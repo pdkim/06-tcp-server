@@ -1,69 +1,85 @@
 'use strict';
 
-//first party modules
+
 const EventEmitter = require('events');
 const net = require('net');
 
-//third party modules
-//gives user unique id in chatroom
+const dotenv = require('dotenv').config();
 const uuid = require('uuid/v4');
 
 const port = process.env.PORT || 3001;
 const server = net.createServer();
 const eventEmitter = new EventEmitter();
-const socketPool = {};
+const clientPool = {};
+
 
 let User = function(socket) {
-  this.name = name;
-
+  let id = uuid();
+  this.id = id;
+  this.nickname = `User-${id}`;
+  this.socket = socket;
 };
 
-server.on('connection', (socket) => { //in docs....
+
+
+server.on('connection', (socket) => {
   const user = new User(socket);
-
-  socketPool[user.id] = user;
-
-  //listening for data
-  //when fired, callback will be a buffer
-  //function dispatch action will take in user id and buffer
+  clientPool[user.id] = user;
   socket.on('data', (buffer) => dispatchAction(user.id, buffer));
   console.log('ok!!', user.id);
-
 });
+
 
 let parse = (buffer) => {
   let text = buffer.toString().trim();
-  if(!text.startsWith('@') ) {return null;}
-  
-  //array destructuring
-  //when syntax is used
-  //
+  if(!text.startsWith('@') ) {return null;}  
   let [command, payload] = text.split(/\s+(.*)/);
   let [target, message] = payload ? payload.split(/\s+(.*)/) : [];
   return {command, payload, target, message};
 };
 
+
 let dispatchAction = (userId, buffer) => {
   let entry = parse(buffer);
-  //checking truthy of entry.
-  //if truthy (after parsed), then it is "safe" and return values
-  //safeguard against null values
-  //same as if entry !=== null && etc.
   entry && eventEmitter.emit(entry.command, entry, userId);
 };
 
+//message all
 eventEmitter.on('@all', (data, userId) => {
-  //pay attention to this formatting
-  //modern way to loop through
-  for(let connection in socketPool) {
-    let user = socketPool[connection];
-    //for all users, find this user and return their nickname and the text body
-    user.socket.write(`<${socketPool[userId].nickname}>: ${data.payload}\n`);
+  for(let connection in clientPool) {
+    let user = clientPool[connection];
+    user.socket.write(`<${clientPool[userId].nickname}>: ${data.payload}\n`);
   }
 });
 
-eventEmitter.on('@nick', (data, userId) => {
-  //within the pool, whoever requested change, change to typed entry
-  //console log data to figure out which key you need
-  socketPool[userId].nickname = data.target;
+//change nickname
+eventEmitter.on('@nickname', (data, userId) => {
+  clientPool[userId].nickname = data.target;
+});
+
+//direct message
+eventEmitter.on(`@dm`, (data, userId) => {
+  data.target = userId;
+  data.message = data;
+  clientPool[data.target].socket.write(data.message);
+});
+
+//list all users
+eventEmitter.on('@list', (data, userId) => {
+  let party = [];
+  for(let connection in clientPool) {
+    data.target = clientPool[connection];
+    party.push(data.target);
+  }
+  userId.socket.write(party);
+});
+
+//exit chatroom
+eventEmitter.on('@quit', (data, userId) => {
+  let notify = `${userId} has left the room.`;
+  clientPool.socket.write(notify);
+});
+
+server.listen(port, () => {
+  console.log(`Chatroom at server: ${port}`);
 });
