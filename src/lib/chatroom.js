@@ -4,7 +4,6 @@
 const EventEmitter = require('events');
 const net = require('net');
 
-const dotenv = require('dotenv').config();
 const uuid = require('uuid/v4');
 
 const port = process.env.PORT || 3001;
