@@ -44,7 +44,7 @@ For this assignment, you will be building a TCP chatroom. Clients should be able
   * The client should send `@list` to list all connected users
   * The client should send `@nickname <new-name>` to change their nickname
   * The client should send `@dm <to-username> <message>` to send a message directly to another user by their nickname
-* Connected clients should be maintained in an in-memory collection (array) called the `clientPool`
+* Connected clients should be maintained in an in-memory collection
   * When a socket emits the `close` event, the socket should be removed from the client pool
   * When a socket emits the `error` event, the error should be logged on the server
   * When a socket emits the `data` event, the data should be logged on the server and the commands below should be implemented
