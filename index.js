@@ -1,7 +1,11 @@
 'use strict';
 
-const server = require('../src/app.js');
+/**
+ * @type {{}}
+ */
 
-const dotenv = require('dotenv').config();
+let app = require('./src/app.js');
 
-server.start(process.env.PORT, () => console.log(`Server started on ${process.env.PORT}`));
+let chat = require('./src/lib/chatroom.js');
+
+events.fire();
