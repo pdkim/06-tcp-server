@@ -9,6 +9,6 @@ let eventEmitter = new EE();
 
 module.exports = eventEmitter;
 
-exports.fire = () => {
-  eventEmitter.emit('@all');
-};
+// exports.fire = () => {
+//   eventEmitter.emit('@all');
+// };

@@ -6,7 +6,7 @@ const net = require('net');
 
 const uuid = require('uuid/v4');
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 const server = net.createServer();
 const eventEmitter = new EventEmitter();
 const clientPool = {};
@@ -53,24 +53,29 @@ eventEmitter.on('@all', (data, userId) => {
 
 //change nickname
 eventEmitter.on('@nickname', (data, userId) => {
-  clientPool[userId].nickname = data.target;
+  let newName = data.target;
+  clientPool[userId].nickname = newName;
+  clientPool[userId].socket.write('' + clientPool[userId].nickname);
 });
 
 //direct message
 eventEmitter.on(`@dm`, (data, userId) => {
-  data.target = userId;
-  data.message = data;
-  clientPool[data.target].socket.write(data.message);
+  const targetUser = data.target;
+  const message = data.message;
+  for(let connection in clientPool) {
+    if(clientPool[connection].nickname === targetUser) {
+      clientPool[connection].socket.write('' + message);
+    }
+  }
 });
 
 //list all users
 eventEmitter.on('@list', (data, userId) => {
   let party = [];
   for(let connection in clientPool) {
-    data.target = clientPool[connection];
-    party.push(data.target);
+    party.push(clientPool[connection].nickname);
   }
-  userId.socket.write(party);
+  clientPool[userId].socket.write('' + party);
 });
 
 //exit chatroom
