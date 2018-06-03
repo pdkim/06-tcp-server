@@ -12,7 +12,7 @@ const eventEmitter = new EventEmitter();
 const clientPool = {};
 
 
-let User = function(socket) {
+let User = function (socket) {
   let id = uuid();
   this.id = id;
   this.nickname = `User-${id}`;
@@ -31,10 +31,10 @@ server.on('connection', (socket) => {
 
 let parse = (buffer) => {
   let text = buffer.toString().trim();
-  if(!text.startsWith('@') ) {return null;}  
+  if (!text.startsWith('@')) { return null; }
   let [command, payload] = text.split(/\s+(.*)/);
   let [target, message] = payload ? payload.split(/\s+(.*)/) : [];
-  return {command, payload, target, message};
+  return { command, payload, target, message };
 };
 
 
@@ -45,7 +45,7 @@ let dispatchAction = (userId, buffer) => {
 
 //message all
 eventEmitter.on('@all', (data, userId) => {
-  for(let connection in clientPool) {
+  for (let connection in clientPool) {
     let user = clientPool[connection];
     user.socket.write(`<${clientPool[userId].nickname}>: ${data.payload}\n`);
   }
@@ -62,8 +62,8 @@ eventEmitter.on('@nickname', (data, userId) => {
 eventEmitter.on(`@dm`, (data, userId) => {
   const targetUser = data.target;
   const message = data.message;
-  for(let connection in clientPool) {
-    if(clientPool[connection].nickname === targetUser) {
+  for (let connection in clientPool) {
+    if (clientPool[connection].nickname === targetUser) {
       clientPool[connection].socket.write('' + message);
     }
   }
@@ -72,7 +72,7 @@ eventEmitter.on(`@dm`, (data, userId) => {
 //list all users
 eventEmitter.on('@list', (data, userId) => {
   let party = [];
-  for(let connection in clientPool) {
+  for (let connection in clientPool) {
     party.push(clientPool[connection].nickname);
   }
   clientPool[userId].socket.write('' + party);
@@ -80,8 +80,13 @@ eventEmitter.on('@list', (data, userId) => {
 
 //exit chatroom
 eventEmitter.on('@quit', (data, userId) => {
-  let notify = `${userId} has left the room.`;
-  clientPool.socket.write(notify);
+  // console.log(clientPool[userId]);
+  const getOut = clientPool[userId].nickname;
+  const notify = `${getOut} has left the room.`;
+  for(let connection in clientPool) {
+    clientPool[connection].socket.write('' + notify);
+  }
+  // server.on('close');
 });
 
 server.listen(port, () => {
