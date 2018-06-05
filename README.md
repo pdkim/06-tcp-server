@@ -1,4 +1,6 @@
-## Lab 03 Asynchronous Callbacks
+[![Build Status](https://travis-ci.com/pdkim/06-tcp-server.svg?branch=pk06)](https://travis-ci.com/pdkim/06-tcp-server)
+
+## Lab 06 TCP Server
 Description: Create a chatroom server through the use of telnet.  Have users message each other and implement special commands they can enter.  Server should be able to log data and send error messages if unable to do a task.
 
 ## Requirements
@@ -9,10 +11,13 @@ Description: Create a chatroom server through the use of telnet.  Have users mes
 
 ##Tests
 1. Checks if user is created?
-Passing? 
+Yes, they should be.
 2. Checks if user can send messages to server?
-Passing?  
+Yes, both to everyone and directly.
 3. Check user commands such as quit and list are functional?
-Passing?
+List is working.
+Quit notifies the chat someone will leave once I figure out how to get one user to exit out.
 4. Check server is working?
-Passing?
+Yes
+5.  Any server side logging/error checking?
+Not yet.
