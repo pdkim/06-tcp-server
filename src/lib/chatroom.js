@@ -6,7 +6,7 @@ const net = require('net');
 
 const uuid = require('uuid/v4');
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const server = net.createServer();
 const eventEmitter = new EventEmitter();
 const clientPool = {};
@@ -80,13 +80,12 @@ eventEmitter.on('@list', (data, userId) => {
 
 //exit chatroom
 eventEmitter.on('@quit', (data, userId) => {
-  // console.log(clientPool[userId]);
   const getOut = clientPool[userId].nickname;
   const notify = `${getOut} has left the room.`;
+  // clientPool[userId].socket.close();
   for(let connection in clientPool) {
     clientPool[connection].socket.write('' + notify);
   }
-  // server.on('close');
 });
 
 server.listen(port, () => {
