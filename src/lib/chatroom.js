@@ -82,10 +82,12 @@ eventEmitter.on('@list', (data, userId) => {
 eventEmitter.on('@quit', (data, userId) => {
   const getOut = clientPool[userId].nickname;
   const notify = `${getOut} has left the room.`;
-  // clientPool[userId].socket.close();
-  for(let connection in clientPool) {
+  for (let connection in clientPool) {
     clientPool[connection].socket.write('' + notify);
   }
+  clientPool[userId].socket.destroy(); 
+  //error when next user attempts to quit....
+  //is this ok?
 });
 
 server.listen(port, () => {
